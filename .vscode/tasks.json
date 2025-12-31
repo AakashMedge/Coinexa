@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Rebuild Next.js app for Tailwind changes",
+			"type": "shell",
+			"command": "npm run build",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Run Next.js dev server for Tailwind test",
+			"type": "shell",
+			"command": "npm run dev",
+			"group": "build"
+		}
+	]
+}
