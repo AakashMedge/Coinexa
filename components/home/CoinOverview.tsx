@@ -1,29 +1,40 @@
 import { fetcher } from '@/lib/coingecko.actions';
 import Image from 'next/image';
-import React from 'react';
 import { CoinOverviewFallback } from '@/components/fallback';
+import CandlestickChart from '../CandlestickChart';
 
 const CoinOverview = async () => {
-  let coin: CoinDetailsData | null = null;
   try {
-    coin = await fetcher<CoinDetailsData>('/coins/bitcoin');
-  } catch (error) {
-    // Optionally log error or report telemetry here
-    console.error('CoinOverview fetch error:', error);
-    return <CoinOverviewFallback />;
-  }
-  if (!coin) return <CoinOverviewFallback />;
+    const [coin, coinOHLCData] = await Promise.all([
+      await fetcher<CoinDetailsData>('/coins/bitcoin', {
+        dex_pair_format: 'symbol',
+      }),
+      await fetcher<OHLCData[]>('/coins/bitcoin/ohlc', {
+        vs_currency: 'usd',
+        days: 1,
+        precision: 'full',
+      }),
+    ]);
   return (
     <div id="coin-overview">
-      <div className="header pt-2">
+      <CandlestickChart data={coinOHLCData} coinId="bitcoin" liveInterval={'1s'}>
+
+         <div className="header pt-2">
         <Image src={coin.image.large} alt={coin.name} width={56} height={56} />
         <div className="info">
           <p>{coin.name} / {coin.symbol.toUpperCase()}</p>
           <h1>${coin.market_data.current_price.usd.toLocaleString()}</h1>
         </div>
       </div>
+      </CandlestickChart>
+     
     </div>
   );
+  } catch (error) {
+    // Optionally log error or report telemetry here
+    console.error('CoinOverview fetch error:', error);
+    return <CoinOverviewFallback />;
+  }
 };
 
 export default CoinOverview;
